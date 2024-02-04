@@ -1,11 +1,13 @@
 from fastapi import FastAPI
 
-from src.routes import contacts, additional
+
+from src.routes import contacts, additional, auth
 
 app = FastAPI()
 
 app.include_router(contacts.router, prefix='')
 app.include_router(additional.router, prefix='')
+app.include_router(auth.router, prefix='')
 
 
 @app.get("/")

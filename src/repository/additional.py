@@ -5,10 +5,10 @@ from datetime import datetime, timedelta
 import calendar
 
 from src.database.db import get_db
-from src.database.models import Contact
+from src.database.models import Contact, User
 
 
-async def read_birthday(db: Session = Depends(get_db)):
+async def read_birthday(user: User, db: Session = Depends(get_db)):
     today = datetime.now().date()
     last_day_in_month = calendar.monthrange(today.year, today.month)[1]
     end_date = today + timedelta(days=7)
@@ -16,6 +16,7 @@ async def read_birthday(db: Session = Depends(get_db)):
     contacts = db.query(Contact).filter(
         or_(
             and_(
+                Contact.user_id == user.id,
                 extract("month", Contact.date_of_birth) == today.month,
                 extract("day", Contact.date_of_birth) >= today.day,
                 or_(
@@ -24,6 +25,7 @@ async def read_birthday(db: Session = Depends(get_db)):
                 ),
             ),
             and_(
+                Contact.user_id == user.id,
                 extract("month", Contact.date_of_birth) == (today + timedelta(days=7)).month,
                 extract("day", Contact.date_of_birth) <= (end_date - timedelta(days=7)).day
             )
@@ -33,12 +35,15 @@ async def read_birthday(db: Session = Depends(get_db)):
     return contacts
 
 
-async def search_by_phrase(phrase: str, db: Session = Depends(get_db)):
+async def search_by_phrase(phrase: str, user: User, db: Session = Depends(get_db)):
     contacts = db.query(Contact).filter(
-        or_(
-            Contact.name.like(f"%{phrase}%"),
-            Contact.last_name.like(f"%{phrase}%"),
-            Contact.email.like(f"%{phrase}%")
+        and_(
+            Contact.user_id == user.id,
+            or_(
+                Contact.name.like(f"%{phrase}%"),
+                Contact.last_name.like(f"%{phrase}%"),
+                Contact.email.like(f"%{phrase}%")
+            )
         )
     ).all()
 
