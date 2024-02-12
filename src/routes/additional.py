@@ -8,7 +8,9 @@ router = APIRouter(prefix='/add', tags=["additional"])
 
 
 @router.get("/birthdays")
-async def read_birthday(db: Session = Depends(get_db)):
+async def read_birthday(
+        db: Session = Depends(get_db)
+):
 
     contacts = await repository_additional.read_birthday(db)
 
@@ -19,7 +21,10 @@ async def read_birthday(db: Session = Depends(get_db)):
 
 
 @router.get("/search")
-async def search_by_phrase(phrase: str, db: Session = Depends(get_db)):
+async def search_by_phrase(
+        phrase: str,
+        db: Session = Depends(get_db)
+):
 
     contacts = await repository_additional.search_by_phrase(phrase, db)
 

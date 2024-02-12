@@ -20,6 +20,12 @@ python-dotenv = "^1.0.1"
 libgravatar = "^1.0.4"
 python-multipart = "^0.0.7"
 bcrypt = "^4.1.2"
+fastapi-mail = "^1.4.1"
+jose = "^1.0.0"
+redis = "^5.0.1"
+pydantic-settings = "^2.1.0"
+fastapi-limiter = "^0.1.6"
+cloudinary = "^1.38.0"
 
 
 [build-system]
