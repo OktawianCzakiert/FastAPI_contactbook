@@ -9,6 +9,16 @@ from src.database.models import Contact, User
 
 
 async def read_birthday(user: User, db: Session = Depends(get_db)):
+    """
+    Retrieve contacts whose birthdays are within the next 7 days for a given user.
+
+    Args:
+        user (User): The user for whom to retrieve contacts.
+        db (Session, optional): The database session. Defaults to Depends(get_db).
+
+    Returns:
+        List[Contact]: A list of contacts whose birthdays are within the next 7 days.
+    """
     today = datetime.now().date()
     last_day_in_month = calendar.monthrange(today.year, today.month)[1]
     end_date = today + timedelta(days=7)
@@ -36,6 +46,17 @@ async def read_birthday(user: User, db: Session = Depends(get_db)):
 
 
 async def search_by_phrase(phrase: str, user: User, db: Session = Depends(get_db)):
+    """
+    Retrieve contacts for a given user that match a given phrase in their name, last name, or email.
+
+    Args:
+        phrase (str): The phrase to search for in the contacts' name, last name, or email.
+        user (User): The user for whom to retrieve contacts.
+        db (Session, optional): The database session. Defaults to Depends(get_db).
+
+    Returns:
+        List[Contact]: A list of contacts matching the given search phrase.
+    """
     contacts = db.query(Contact).filter(
         and_(
             Contact.user_id == user.id,

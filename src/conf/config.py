@@ -1,5 +1,6 @@
 import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from icecream import ic
 
 
 DOTENV = os.path.join(os.path.dirname(__file__), ".env")
@@ -10,7 +11,7 @@ class Settings(BaseSettings):
     postgres_db: str
     postgres_user: str
     postgres_password: str
-    postgres_port: int
+    postgres_port: int = 5432
     sqlalchemy_database_url: str
     scheme: str
     secret_key: str
@@ -18,8 +19,13 @@ class Settings(BaseSettings):
     mail_username: str
     mail_password: str
     mail_from: str
-    mail_port: int
-    mail_server: str
+    mail_port: int = 587
+    mail_server: str = 'smtp.gmail.com'
+    mail_from_name: str
+    mail_starttls: bool = True
+    mail_ssl_tls: bool = False
+    use_credentials: bool = True
+    validate_certs: bool = True
     redis_host: str = 'localhost'
     redis_port: int = 6379
     cloudinary_name: str
@@ -31,4 +37,4 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-# print(settings.dict())
+# ic(settings.dict())

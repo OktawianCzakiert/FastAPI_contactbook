@@ -25,12 +25,41 @@ class Auth:
     r = redis.Redis(host=settings.redis_host, port=settings.redis_port, db=0)
 
     def verify_password(self, plain_password, hashed_password):
+        """
+        Verify the provided plain password matches the hashed password.
+
+        Args:
+            plain_password: The plain password.
+            hashed_password: The hashed password to compare against.
+
+        Returns:
+            bool: True if the plain password matches the hashed password, False otherwise.
+        """
         return self.pwd_context.verify(plain_password, hashed_password)
 
     def get_password_hash(self, password: str):
+        """
+        Generate a hashed password for the given password.
+
+        Args:
+            password: The password to hash.
+
+        Returns:
+            str: The hashed password.
+        """
         return self.pwd_context.hash(password)
 
     async def create_access_token(self, data: dict, expires_delta: Optional[float] = None):
+        """
+        Create an access token with the provided data.
+
+        Args:
+            data: Data to be encoded into the token.
+            expires_delta: Optional expiration time delta in seconds.
+
+        Returns:
+            str: The encoded access token.
+        """
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.now() + timedelta(seconds=expires_delta)
@@ -41,6 +70,16 @@ class Auth:
         return encoded_access_token
 
     async def create_refresh_token(self, data: dict, expires_delta: Optional[float] = None):
+        """
+        Create a refresh token with the provided data.
+
+        Args:
+            data: Data to be encoded into the token.
+            expires_delta: Optional expiration time delta in seconds.
+
+        Returns:
+            str: The encoded refresh token.
+        """
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.now() + timedelta(seconds=expires_delta)
@@ -51,6 +90,18 @@ class Auth:
         return encoded_refresh_token
 
     async def decode_refresh_token(self, refresh_token: str):
+        """
+         Decode the refresh token and return the associated email.
+
+         Args:
+             refresh_token: The refresh token to decode.
+
+         Returns:
+             str: The email associated with the token.
+
+         Raises:
+             HTTPException: If the token is invalid.
+         """
         try:
             payload = jwt.decode(refresh_token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
             if payload['scope'] == 'refresh_token':
@@ -61,6 +112,19 @@ class Auth:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Could not validate credentials')
 
     async def get_current_user(self, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+        """
+        Retrieve the current user based on the provided token.
+
+        Args:
+            token: The authentication token.
+            db: The database session.
+
+        Returns:
+            Any: The current user.
+
+        Raises:
+            HTTPException: If the token is invalid or the user cannot be retrieved.
+        """
         credentials_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
@@ -89,6 +153,15 @@ class Auth:
         return user
 
     def create_email_token(self, data: dict):
+        """
+        Create an email verification token with the provided data.
+
+        Args:
+            data: Data to be encoded into the token.
+
+        Returns:
+            str: The encoded email verification token.
+        """
         to_encode = data.copy()
         expire = datetime.now() + timedelta(days=7)
         to_encode.update({"iat": datetime.now(), "exp": expire})
@@ -96,6 +169,18 @@ class Auth:
         return token
 
     async def get_email_from_token(self, token: str):
+        """
+        Decode the email verification token and return the associated email.
+
+        Args:
+            token: The email verification token to decode.
+
+        Returns:
+            str: The email associated with the token.
+
+        Raises:
+            HTTPException: If the token is invalid.
+        """
         try:
             payload = jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
             email = payload["sub"]

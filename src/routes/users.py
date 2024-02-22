@@ -15,6 +15,16 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get("/me/", response_model=UserDb)
 async def read_users_me(current_user: User = Depends(auth_service.get_current_user)):
+    """
+    Retrieve the current user's profile.
+
+    Args:
+        current_user (User): The authenticated user.
+
+    Returns:
+        UserDb: The profile of the authenticated user.
+
+    """
     return current_user
 
 
@@ -24,6 +34,18 @@ async def update_avatar_user(
     current_user: User = Depends(auth_service.get_current_user),
     db: Session = Depends(get_db),
 ):
+    """
+    Update the avatar of the current user.
+
+    Args:
+        file (UploadFile): The file containing the new avatar image.
+        current_user (User): The authenticated user.
+        db (Session): The database session.
+
+    Returns:
+        UserDb: The updated user profile after the avatar is updated.
+
+    """
     cloudinary.config(
         cloud_name=settings.cloudinary_name,
         api_key=settings.cloudinary_api_key,

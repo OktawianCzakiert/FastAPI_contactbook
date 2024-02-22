@@ -1,3 +1,9 @@
+"""
+This module contains a FastAPI application with various routers and middleware configurations.
+It defines routes for contacts, additional features, authentication, and user management.
+The application utilizes Redis for rate limiting using FastAPI Limiter.
+"""
+
 import uvicorn
 import redis.asyncio as redis
 from fastapi import FastAPI, Depends
@@ -31,6 +37,10 @@ app.include_router(users.router, prefix='')
 
 @app.on_event("startup")
 async def startup():
+    """
+    Perform startup operations for the FastAPI application.
+    Connects to Redis server defined in settings for rate limiting initialization.
+    """
     r = await redis.Redis(host=settings.redis_host, port=settings.redis_port, db=0, encoding="utf-8",
                           decode_responses=True)
     await FastAPILimiter.init(r)
@@ -38,6 +48,10 @@ async def startup():
 
 @app.get("/", dependencies=[Depends(RateLimiter(times=2, seconds=5))])
 def read_root():
+    """
+    Root endpoint of the FastAPI application.
+    Implements rate limiting with a limit of 2 requests per 5 seconds.
+    """
     return {"message": "Hello World"}
 
 

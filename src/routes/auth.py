@@ -19,6 +19,18 @@ async def signup(
         request: Request,
         db: Session = Depends(get_db)
 ):
+    """
+    Register a new user.
+
+    Parameters:
+    - `body`: UserModel: User data including email and password.
+    - `background_tasks`: BackgroundTasks: Used to run tasks in the background.
+    - `request`: Request: The request object.
+    - `db`: Session = Depends(get_db): Database session.
+
+    Returns:
+    - dict: A dictionary containing the new user details and a confirmation message.
+    """
     exist_user = await repository_users.get_user_by_email(body.email, db)
     if exist_user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Account already exists")
@@ -36,6 +48,16 @@ async def login(
         body: OAuth2PasswordRequestForm = Depends(),
         db: Session = Depends(get_db)
 ):
+    """
+    Authenticate and log in a user.
+
+    Parameters:
+    - `body`: OAuth2PasswordRequestForm: The login credentials.
+    - `db`: Session = Depends(get_db): Database session.
+
+    Returns:
+    - dict: A dictionary containing the access and refresh tokens.
+    """
     user = await repository_users.get_user_by_email(body.username, db)
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email")
@@ -61,6 +83,18 @@ async def request_email(
         request: Request,
         db: Session = Depends(get_db)
 ):
+    """
+    Request email confirmation.
+
+    Parameters:
+    - `body`: RequestEmail: Contains the email address for confirmation.
+    - `background_tasks`: BackgroundTasks: Used to run tasks in the background.
+    - `request`: Request: The request object.
+    - `db`: Session = Depends(get_db): Database session.
+
+    Returns:
+    - dict: A message indicating email confirmation status.
+    """
     user = await repository_users.get_user_by_email(body.email, db)
 
     if user.confirmed:
@@ -75,6 +109,16 @@ async def refresh_token(
         credentials: HTTPAuthorizationCredentials = Security(security),
         db: Session = Depends(get_db)
 ):
+    """
+    Refresh access token.
+
+    Parameters:
+    - `credentials`: HTTPAuthorizationCredentials: Credentials for accessing the endpoint.
+    - `db`: Session = Depends(get_db): Database session.
+
+    Returns:
+    - dict: A dictionary containing the refreshed access and refresh tokens.
+    """
     token = credentials.credentials
     email = await auth_service.decode_refresh_token(token)
     user = await repository_users.get_user_by_email(email, db)
@@ -97,6 +141,16 @@ async def confirmed_email(
         token: str,
         db: Session = Depends(get_db)
 ):
+    """
+    Confirm email.
+
+    Parameters:
+    - `token`: str: Token for email confirmation.
+    - `db`: Session = Depends(get_db): Database session.
+
+    Returns:
+    - dict: A message confirming email verification.
+    """
     email = await auth_service.get_email_from_token(token)
     user = await repository_users.get_user_by_email(email, db)
     if user is None:
